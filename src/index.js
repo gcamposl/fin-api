@@ -12,12 +12,19 @@ const costumers = []; //bd fake
 */
 app.post("/account", (request, response) => {
   const { cpf, name } = request.body;
-  const id = uuidv4(); // gera um id randomico 
+
+  const customersAlredyExists = costumers.some(
+    (customers) => customers.cpf === cpf
+  );
+
+  if (customersAlredyExists) {
+    return response.status(400).json({ error: "Customer already exists!" })
+  }
 
   costumers.push({
     cpf,
     name,
-    id,
+    id: uuidv4(), // gera um id randomico
     statement: []
   });
 
