@@ -4,12 +4,22 @@ const app = express();
 app.use(express.json());
 
 const customers = []; //bd fake
-/*
-* CPF - string
-* name - string
-* id - uuid
-* statement - []
-*/
+
+//Middleware
+function veriftIfExistsAccountCPF(request, response, next) {
+  const { cpf } = request.headers;
+
+  const customer = customers.find((customer) => customer.cpf === cpf);
+
+  if (!customer) {
+    return response.status(400).json({ error: "Customer NOT FOUND" })
+  }
+
+  request.customer = customer;
+
+  return next();
+}
+
 app.post("/account", (request, response) => {
   const { cpf, name } = request.body;
 
@@ -31,14 +41,10 @@ app.post("/account", (request, response) => {
   return response.status(201).send();
 })
 
-app.get("/statement/", (request, response) => {
-  const { cpf } = request.headers;
+//app.use(veriftIfExistsAccountCPF); // todas as rotas que tiverem abaixo utilizaram este middleware
 
-  const customer = customers.find((customer) => customer.cpf === cpf);
-
-  if (!customer) {
-    return response.status(400).json({ error: "Customer NOT FOUND" })
-  }
+app.get("/statement/", veriftIfExistsAccountCPF, (request, response) => {
+  const { customer } = request;
   return response.json(customer.statement);
 });
 
