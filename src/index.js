@@ -54,7 +54,7 @@ app.post("/account", (request, response) => {
 
 //app.use(veriftIfExistsAccountCPF); // todas as rotas que tiverem abaixo utilizaram este middleware
 
-app.get("/statement/", veriftIfExistsAccountCPF, (request, response) => {
+app.get("/statement", veriftIfExistsAccountCPF, (request, response) => {
   const { customer } = request;
   return response.json(customer.statement);
 });
@@ -96,5 +96,17 @@ app.post("/withdraw", veriftIfExistsAccountCPF, (request, response) => {
 
   return response.status(201).send();
 })
+
+app.get("/statement/date", veriftIfExistsAccountCPF, (request, response) => {
+  const { customer } = request;
+  const { date } = request.query;
+
+  const dateFormat = new Date(date + " 00:00");
+
+  const statement = customer.statement.filter((statement) =>
+    statement.created_at.toDateString() === new Date(dateFormat).toDateString());
+
+  return response.json(statement);
+});
 
 app.listen(3333);
